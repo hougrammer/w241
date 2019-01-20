@@ -2,7 +2,9 @@
 title: "Problem Set #1"
 author: "Experiments and Causality"
 date: \today
-output: pdf_document
+output: 
+  pdf_document: 
+    latex_engine: xelatex
 ---
 <!--
 Some guidelines for submitting problem sets in this course:
@@ -13,7 +15,7 @@ Some guidelines for submitting problem sets in this course:
 - It is highly recommended, although not required, that you use the RMarkdown feature in RStudio to compose your problem set answers. RMarkdown allows you to easily intermingle analysis code and answers in one document. It is of a similar design as `jupyter` and an ipython notebook.
 - You do not need to show work for trivial calculations, but showing work is always allowed.
 - For answers that involve a narrative response, please feel free to describe the key concept directly and briefly, if you can do so, and do not feel pressure to go on at length.
-- Please ask us questions about the problem set if you get stuck. **Don’t spend more than 20 minutes puzzling over what a problem means.** 
+- Please ask us questions about the problem set if you get stuck. **Don't spend more than 20 minutes puzzling over what a problem means.** 
 - Please ensure that someone (us!) can compile your solution set. The best way is to use the web-hosted links we've provided. 
 - For text answers, please **embolden** your answers to the questions.
 - For computing answers, please store them in the answer objects we have created. 
@@ -22,18 +24,25 @@ Some guidelines for submitting problem sets in this course:
 # 1. Potential Outcomes Notation 
 
 - Explain the notation $Y_{i}(1)$.
+
 **It's the potential outcome for treatment of the i^th^ observation.**
 
 - Explain the notation $E[Y_{i}(1)|d_{i}=0]$.
 
+**It's the expectation of the potential outcome for treatment of the i^th^ observation, given that the i^th^ observation is in the control group.**
+
 - Explain the difference between the notation $E[Y_{i}(1)]$ and the notation $E[Y_{i}(1)|d_{i}=1]$.
 (Extra credit) 
+
+**The first is the expectation of the potential outcome for treatment.  The second is the expectation of the potential outcome for treatment given that the observation is in the treatment group.  Given random assignment, these two numbers should be identical.  However, selection bias can cause the two numbers to differ.**
 
 - Explain the difference between the notation $E[Y_{i}(1)|d_{i}=1]$ and the notation 
 $E[Y_{i}(1)|D_{i}=1]$.  Use exercise 2.7 from FE to give a concrete example of the difference.
 
+
 # 2. Potential Outcomes Practice
 Use the values in the following table to illustrate that $E[Y_{i}(1)] - E[Y_{i}(0)] = E[Y_{i}(1) - Y_{i}(0)]$.
+
 
 +---------------+------------+------------+----------+
 |               | $Y_{i}(0)$ | $Y_{i}(1)$ | $\tau_i$ |
@@ -53,6 +62,15 @@ Use the values in the following table to illustrate that $E[Y_{i}(1)] - E[Y_{i}(
 |Individual 5   |  10        |  8         |  -2      |                          
 |               |            |            |          |                      
 +---------------+------------+------------+----------+
+
+$$
+\begin{aligned}
+E[Y_{i}(1)] &= \frac{5+3+10+5+10}{5} &= 6.6 \\
+E[Y_{i}(0)] &= \frac{6+8+12+5+8}{5} &= 7.8 \\
+E[Y_{i}(1) - Y_{i}(0)] &= \frac{1+5+2+0-2}{5} &= 1.2 \\
+E[Y_{i}(1)] - E[Y_{i}(0)] &= E[Y_{i}(1) - Y_{i}(0)]
+\end{aligned}
+$$
 
 # 3. Conditional Expectations
 
@@ -90,33 +108,57 @@ Use the values depicted in the table above to complete the table below.
 
 \newpage
 
-+---------------+----+----+----+--------------------------+
-| $Y_{i}(0)$    | 15 | 20 | 30 | Marginal $Y_{i}(0)$      |
-+===============+====+====+====+==========================+
-|10             | n: | n: |n:  |                          |
-|               | %: | %: | %: |                          |
-+---------------+----+----+----+--------------------------+
-|15             | n: | n: | n: |                          |
-|               | %: | %: | %: |                          |
-+---------------+----+----+----+--------------------------+
-|20             | n: | n: | n: |                          |
-|               | %: | %: | %: |                          |
-+---------------+----+----+----+--------------------------+
-|Marginal       |    |    |    |                          |
-| $Y_{i}(1)$    |    |    |    | 1.0                      |
-+---------------+----+----+----+--------------------------+
+<!-- +---------------+------+----+----+--------------------------+ -->
+<!-- | $Y_{i}(0)$    | 15   | 20 | 30 | Marginal $Y_{i}(0)$      | -->
+<!-- +===============+======+====+====+==========================+ -->
+<!-- |10             |n: 1  |n: 1  |n: 0  |  0.29                    | -->
+<!-- |               |      |      |      |                          | -->
+<!-- |               |%:0.14|%:0.14|%:0.00|                    | -->
+<!-- +---------------+----+----+----+--------------------------+ -->
+<!-- |15             | n: 2 | n: 0 | n: 1 |  0.43                        | -->
+<!-- |               |    |    |    |                          | -->
+<!-- |               | %: 0.29 | %: 0.00 | %: 0.14 |                          | -->
+<!-- +---------------+----+----+----+--------------------------+ -->
+<!-- |20             | n: 1 | n: 0 | n: 1|   0.29                       | -->
+<!-- |               |    |    |    |                          | -->
+<!-- |               | %: 0.14 | %: 0.00 | %: 0.14 |                          | -->
+<!-- +---------------+----+----+----+--------------------------+ -->
+<!-- |Marginal       |    |    |    |                          | -->
+<!-- | $Y_{i}(1)$    |  0.57  |  0.14  |  0.29  | 1.0                      | -->
+<!-- +---------------+----+----+----+--------------------------+ -->
+
+
+| $Y_{i}(0)$    | 15 | 20 | 30 | Marginal $Y_{i}(0)$     |
+|---|---|---|---|---|
+|10             | n: 1    | n: 1    | n: 0      | 0.29         |
+|               | %: 0.14 | %: 0.14 | %: 0.00   |              |
+|15             | n: 2    | n: 0    | n: 1      | 0.43         |
+|               | %: 0.29 | %: 0.00 | %: 0.14   |              |
+|20             | n: 1    | n: 0    | n: 1      | 0.29         |
+|               | %: 0.14 | %: 0.00 | %: 0.14   |              |
+| Marginal $Y_{i}(1)$     | 0.57    | 0.14      | 0.29   | 1.0 |
 
 a. Fill in the number of observations in each of the nine cells; 
 b. Indicate the percentage of all subjects that fall into each of the nine cells. 
 c. At the bottom of the table, indicate the proportion of subjects falling into each category of $Y_{i}(1)$. 
 d. At the right of the table, indicate the proportion of subjects falling into each category of $Y_{i}(0)$. 
 e. Use the table to calculate the conditional expectation that $E[Y_{i}(0)|Y_{i}(1) > 15]$. 
+
+$$
+E[Y_{i}(0)|Y_{i}(1) > 15] = \frac{10+15+20}{3} = 15
+$$
+
 f. Use the table to calculate the conditional expectation that $E[Y_{i}(1)|Y_{i}(0) > 15]$. 
+
+$$
+E[Y_{i}(1)|Y_{i}(0) > 15] = \frac{15+30}{2} = 22.5
+$$
+
 
 # 4. More Practice with Potential Outcomes
 Suppose we are interested in the hypothesis that children playing outside leads them to have better eyesight.  
 
-Consider the following population of ten representative children whose visual acuity we can measure.  (Visual acuity is the decimal version of the fraction given as output in standard eye exams.  Someone with 20/20 vision has acuity 1.0, while someone with 20/40 vision has acuity 0.5.  Numbers greater than 1.0 are possible for people with better than “normal” visual acuity.)
+Consider the following population of ten representative children whose visual acuity we can measure.  (Visual acuity is the decimal version of the fraction given as output in standard eye exams.  Someone with 20/20 vision has acuity 1.0, while someone with 20/40 vision has acuity 0.5.  Numbers greater than 1.0 are possible for people with better than "normal" visual acuity.)
 
 ```{r, echo = F}
 d <- data.frame(child = 1:10, 
@@ -125,53 +167,83 @@ d <- data.frame(child = 1:10,
 knitr::kable(d)
 ```
 
-In the table, state $Y_{i}(1)$ means “playing outside an average of at least 10 hours per week from age 3 to age 6,” and state $Y_{i}(0)$ means “playing outside an average of less than 10 hours per week from age 3 to age 6.”   $Y_{i}$ represents visual acuity measured at age 6.
+In the table, state $Y_{i}(1)$ means "playing outside an average of at least 10 hours per week from age 3 to age 6," and state $Y_{i}(0)$ means "playing outside an average of less than 10 hours per week from age 3 to age 6."   $Y_{i}$ represents visual acuity measured at age 6.
 
 a. Compute the individual treatment effect for each of the ten children.  Note that this is only possible because we are working with hypothetical potential outcomes; we could never have this much information with real-world data. (We encourage the use of computing tools on all problems, but please describe your work so that we can determine whether you are using the correct values.)
 
-```{r, echo = F}
-answer.POa <- NA
+**Just take the difference between `y1` and `y2`.**
+
+```{r}
+answer.POa <- d$y1 - d$y0
+answer.POa
 ```
 
 b. In a single paragraph, tell a story that could explain this distribution of treatment effects.
+
+**The treatment effect is zero for most of the children.  By random chance, a few of the children's acuities are affected by playing outside.**
+
 c. What might cause some children to have different treatment effects than others?
+
+**Each child responds differently to being outside.  Most of them receive no effect to their acuities.  A positive treatment effect might be one leading from less time in front a computer screen; a negative effect, from harmful sunlight.**
+
 d. For this population, what is the true average treatment effect (ATE) of playing outside.
 
-```{r, echo = F}
-answer.POd <- NA
+**Just take the mean of the previous answer.**
+
+```{r}
+answer.POd <- mean(answer.POa)
+answer.POd
 ``` 
 
 e. Suppose we are able to do an experiment in which we can control the amount of time that these children play outside for three years.  We happen to randomly assign the odd-numbered children to treatment and the even-numbered children to control.  What is the estimate of the ATE you would reach under this assignment? (Again, please describe your work.)
 
-```{r, echo = F}
-answer.POe <- NA
+**Assign the children to treatment and control.  Take the mean of `y1` of the former minus the `y0` of the latter.**
+
+```{r}
+library(data.table)
+dt = data.table(d)
+answer.POe <- mean(dt[child %% 2 == 1, y1] - dt[child %% 2 == 0, y0])
+answer.POe
 ``` 
 
 f. How different is the estimate from the truth?  Intuitively, why is there a difference?
+
+**The estimate is off by `.02`.  This difference is just due to random chance.**
+
 g. We just considered one way (odd-even) an experiment might split the children. How many different ways (every possible way) are there to split the children into a treatment versus a control group (assuming at least one person is always in the treatment group and at least one person is always in the control group)?
 
-```{r, echo = F}
-answer.POg <- NA
+**This is just the sum of the combinations, N choose i, for i from 1 to N-1.**
+$$
+\sum_{i=1}^{N-1}{ N \choose i}
+$$
+
+```{r}
+answer.POg <- sum(choose(10, 1:9))
+answer.POg
 ```
 
 h. Suppose that we decide it is too hard to control the behavior of the children, so we do an observational study instead.  Children 1-5 choose to play an average of more than 10 hours per week from age 3 to age 6, while Children 6-10 play less than 10 hours per week.  Compute the difference in means from the resulting observational data.
 
-```{r, echo = F}
-answer.POh <- NA
+```{r}
+answer.POh <- mean(dt[child <= 5, y1] - dt[child >= 6, y0])
+answer.POh
 ``` 
 
 i. Compare your answer in (h) to the true ATE.  Intuitively, what causes the difference?
 
+**The children who who chose to play an average of more than 10 hours might do so because they like to play outside, and vice versa.  One could envision that children whose eyesights are damaged by being outside might choose to stay inside.  The converse is probably true as well.  Therefore we see much larger effect here.**
 
 <!--
 # 5. FE, exercise 2.5
 
-*Note that the book typically defines D to be 0 for control and 1 for treatment. However, it doesn't have to be 0/1. In particular, one can have more than two treatments, or a continuous treatment variable. Here, the authors want to define D to be the number of minutes the subject is asked to donate. (This is because “D” stands for “dosage.”)*
+*Note that the book typically defines D to be 0 for control and 1 for treatment. However, it doesn't have to be 0/1. In particular, one can have more than two treatments, or a continuous treatment variable. Here, the authors want to define D to be the number of minutes the subject is asked to donate. (This is because D stands for dosage.)*
 -->
 
 # 5. Randomization and Experiments
 
 Suppose that a reasearcher wants to investigate whether after-school math programs improve grades. The researcher randomly samples a group of students from an elementary school and then compare the grades between the group of students who are enrolled in an after-school math program to those who do not attend any such program. Is this an experiment or an observational study? Why? 
+
+**This is an observational study.  There was no intervention made on the students sampled from the school.  The researcher had no say on whether those students went to an after-school program or not.  It is easy to see that students who attend such programs voluntarily (or are forced by their parents) can have different grades than their peers, regardless of the effectiveness of the programs.**
 
 <!--
 #7: Skip in 2017
@@ -198,14 +270,19 @@ c. What do these results seem to suggest about the effectiveness of the RTIA as 
 
 # 6. Lotteries
 
-A researcher wants to know how winning large sums of money in a national lottery affect people's views about the estate tax. The research interviews a random sample of adults and compares the attitudes of those who report winning more than $10,000 in the lottery to those who claim to have won little or nothing. The researcher reasons that the lottery choose winners at random, and therefore the amount that people report having won is random. 
+A researcher wants to know how winning large sums of money in a national lottery affect people's views about the estate tax. The researcher interviews a random sample of adults and compares the attitudes of those who report winning more than $10,000 in the lottery to those who claim to have won little or nothing. The researcher reasons that the lottery choose winners at random, and therefore the amount that people report having won is random. 
 
-a. Critically emvaluate this assumption. 
+a. Critically evaluate this assumption. 
+
+**The assumption is reasonable if all the interviewed people played the lottery with roughly equal frequency, even those who did not win anything.  The lottery randomly selects winners' sums within the subset of people who play, but does nothing to the ones who do not.  It is possible that lottery players and non-players have different views on estate taxes but winning large sums of money has no effect.**
+
 b. Suppose the researcher were to restrict the sample to people who had played the lottery at least once during the past year. Is it safe to assume that the potential outcomes of those who report winning more than $10,000 are identical, in expectation, to those who report winning little or nothing? 
+
+**This assumption is still questionable if the chances of winning larges sums is significantly increased by people who buy numerous tickets.  In practice, it may be infeasible for anyone to buy enough lottery tickets to significantly boost thier chances of winning while maintaining positive gains.  However, it is still worth controlling for the frequency at which people play.**
 
 *Clarifications* 
 
-1. Please think of the outcome variable as an individual’s answer to the survey question “Are you in favor of raising the estate tax rate in the United States?”
+1. Please think of the outcome variable as an individual's answer to the survey question "Are you in favor of raising the estate tax rate in the United States?"
 2. The hint about potential outcomes could be rewritten as follows: Do you think those who won the lottery would have had the same views about the estate tax if they had actually not won it as those who actually did not win it? (That is, is $E[Y_{i}0|D=1] = E[Y_{i}0|D=0]$, comparing what would have happened to the actual winners, the $|D=1$ part, if they had not won, the $Y_{i}(0)$ part, and what actually happened to those who did not win, the $Y_{i}(0)|D=0$ part.) In general, it is just another way of asking, "are those who win the lottery and those who have not won the lottery comparable?"
 3. Assume lottery winnings are always observed accurately and there are no concerns about under- or over-reporting.
 
@@ -214,6 +291,6 @@ A researcher studying 1,000 prison inmates noticed that prisoners who spend at l
 
 In this study, nature has assigned a particular realization of $d_{i}$ to each subject. When assessing this study, why might one be hesitant to assume that ${E[Y_{i}(0)|D_{i}=0] = E[Y_{i}(0)|D_{i}=1]}$ and $E{[Y_{i}(1)|D_{i}=0] = E[Y_{i}(1)|D_{i}=1]}$? In your answer, give some intuitive explanation in English for what the mathematical expressions mean.
 
-
+**The prisoners who were already reading 3 hours per day may have some other reason to be less violently inclined.  This selection bias causes ${E[Y_{i}(0)|D_{i}=0] \ne E[Y_{i}(0)|D_{i}=1]}$ and $E{[Y_{i}(1)|D_{i}=0] \ne E[Y_{i}(1)|D_{i}=1]}$.  These equalities represent the potential outcomes for prisoners in the reading and non-reading group.  If the prisoners had been truly randomly assigned to the treatment and control, the potential outcomes would be same regardless of whether they were in treatment or control.  That is, the prisoners in treatment group would have the same reduction of violence from reading as the ones in the control group.  However, in this case, some prisoners self-selected to be in the treatment group.  It is likely that these prisoners naturally have a low potential outcome of violent encounters.**
 
 
