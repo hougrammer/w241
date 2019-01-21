@@ -39,6 +39,7 @@ Some guidelines for submitting problem sets in this course:
 - Explain the difference between the notation $E[Y_{i}(1)|d_{i}=1]$ and the notation 
 $E[Y_{i}(1)|D_{i}=1]$.  Use exercise 2.7 from FE to give a concrete example of the difference.
 
+**$E[Y_{i}(1)|d_{i}=1]$ is the expectation of the potential outcome given one specifc assignment of treatments.  $E[Y_{i}(1)|D_{i}=1]$ is the expectation over all possible assignments of treatments.  For the example in the book, $E[Y_{i}(1)|d_{i}=1]$ is the expected potential outcome when villages 1 and 7 are chosen for treatment.  $E[Y_{i}(1)|D_{i}=1]$ is the expected potential outcome over all possible village partitions.**
 
 # 2. Potential Outcomes Practice
 Use the values in the following table to illustrate that $E[Y_{i}(1)] - E[Y_{i}(0)] = E[Y_{i}(1) - Y_{i}(0)]$.
@@ -65,8 +66,8 @@ Use the values in the following table to illustrate that $E[Y_{i}(1)] - E[Y_{i}(
 
 $$
 \begin{aligned}
-E[Y_{i}(1)] &= \frac{5+3+10+5+10}{5} &= 6.6 \\
-E[Y_{i}(0)] &= \frac{6+8+12+5+8}{5} &= 7.8 \\
+E[Y_{i}(0)] &= \frac{5+3+10+5+10}{5} &= 6.6 \\
+E[Y_{i}(1)] &= \frac{6+8+12+5+8}{5} &= 7.8 \\
 E[Y_{i}(1) - Y_{i}(0)] &= \frac{1+5+2+0-2}{5} &= 1.2 \\
 E[Y_{i}(1)] - E[Y_{i}(0)] &= E[Y_{i}(1) - Y_{i}(0)]
 \end{aligned}
