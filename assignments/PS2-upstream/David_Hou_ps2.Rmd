@@ -125,7 +125,7 @@ d %>%
     group_by(term2year) %>% 
     summarise(mean(bills_introduced))
 ```
-**4-year terms seem more productive.**
+**4-year terms seem more productive.  This is the randomized treatment in the study and is causal relationship we want to investigate.**
 
 ```{r}
 d %>% 
@@ -281,7 +281,7 @@ sqrt(1/(k-1) * (m*varY0_b/(N-m) + (N-m)*varY1_b/m) + 2*cov(Y0_b,Y1_b))
 
 c. Why do the two methods of forming clusters lead to different standard errors? What are the implications for the design of cluster randomized experiments? 
 
-**The data frame is sorted by potential outcome for control.  Therefore, when we create clusters using villages that are adjacent in the list, we get a higher value for `varY0`(** `r round(varY0_a, 2)` **)than if we cluster using villages from opposite ends of the list(** `r round(varY0_b, 2)` **).  The implication is that we need to be careful with units that are clustered together.  The intracluster variance in potential outcomes may be low, but the intercluster variance may be high, leading to a high standard error for our ATE estimate.**
+**The data frame is sorted by potential outcome for control.  Therefore, when we create clusters using villages that are adjacent in the list, we get a higher standard error than if we cluster using villages from opposite ends of the list.  The implication is that we need to be careful with units that are clustered together.  The intracluster variance in potential outcomes may be low, but the intercluster variance may be high, leading to a high standard error for our ATE estimate.**
 
 
 # 4. Sell Phones? 
