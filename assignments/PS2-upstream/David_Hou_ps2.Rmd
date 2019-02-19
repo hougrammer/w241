@@ -125,14 +125,14 @@ d %>%
     group_by(term2year) %>% 
     summarise(mean(bills_introduced))
 ```
-**4-year terms seem more productive.  This is the randomized treatment in the study and is causal relationship we want to investigate.**
+**4-year terms seem more productive.**
 
 ```{r}
 d %>% 
     group_by(term2year, texas0_arkansas1) %>% 
     summarise(mean(bills_introduced))
 ```
-**State is a stronger predictor of introduced bills than term length. It makes sense to block on state.**
+**State is a stronger predictor of introduced bills than term length. It makes sense to block on state.  The data does not actually allow us to say which variable is the causal one.  We do not have enough qualitative information to say.**
 
 b. For each state, estimate the standard error of the estimated ATE. 
 
@@ -233,6 +233,30 @@ library(ggplot2)
 library(reshape2)
 m = melt(simulation[2:5])
 ggplot(m, aes(x=value, fill=variable)) + 
+    geom_density(alpha = .75) +
+    theme(legend.position = c(.8, .8))
+```
+
+**I wasn't sure if I was supposed to plot the simulation results or the results from the original data.  But since the above histograms are all just demonstrations of the central limit theorem, here are histograms from the original data.**
+
+```{r fig.height=4}
+hist(d %>% filter(term2year == 0 & texas0_arkansas1 == 0) %>% pull(bills_introduced),
+     main = '4 Year Term, Texas', xlab = 'Bills Introduced')
+hist(d %>% filter(term2year == 1 & texas0_arkansas1 == 0) %>% pull(bills_introduced),
+     main = '2 Year Term, Texas', xlab = 'Bills Introduced')
+hist(d %>% filter(term2year == 0 & texas0_arkansas1 == 1) %>% pull(bills_introduced),
+     main = '4 Year Term, Arkansas', xlab = 'Bills Introduced')
+hist(d %>% filter(term2year == 1 & texas0_arkansas1 == 1) %>% pull(bills_introduced),
+     main = '2 Year Term, Arkansas', xlab = 'Bills Introduced')
+```
+
+```{r}
+d = d %>% mutate(group = c('bills_4year_texas', 
+                           'bills_2year_texas', 
+                           'bills_4year_arkansas', 
+                           'bills_2year_arkansas')[term2year + texas0_arkansas1*2 + 1]
+                     )
+ggplot(d, aes(x=bills_introduced, fill=group)) + 
     geom_density(alpha = .75) +
     theme(legend.position = c(.8, .8))
 ```
@@ -417,6 +441,8 @@ g. Compute the same p-value again using analytic formulas for a two-sample t-tes
 ```{r}
 t.test(d2$bid ~ d2$uniform_price_auction)
 ```
+**The confidence interval flipped but it's because of how R interpretted which one is treatment and which is control.**
+
 
 h. Compare the two p-values in parts (e) and (f). Are they much different? Why or why not? How might your answer to this question change if the sample size were different?
 
