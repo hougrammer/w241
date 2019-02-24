@@ -63,7 +63,7 @@ coefci(m1)
 
 b. What are the clusters in Broockman and Green's study? Why might taking clustering into account increase the standard errors?
 
-**The study had clusters of people grouped by their demographics, e.g. age, gender, and location.**
+**The study had clusters of people grouped by their demographics, e.g. age, gender, and location.  People within the same cluster may respond very similarly, but the intercluster variance may be high.  Since there is no way to randomize within clusters, they act like a single data point each, increasing the standard errors.**
 
 c. Now repeat part (a), but taking clustering into account. That is, compute a confidence interval for the effect of the ad on candidate name recognition in Study 1, but now correctly accounting for the clustered nature of the treatment assignment. If you're not familiar with how to calculate these clustered and robust estimates, there is a demo worksheet that is available in our course repository: `./code/week5clusterAndRobust.Rmd`.
 
@@ -111,14 +111,14 @@ coefci(m4, vcov. = m4$cluster.vcov)
 
 g. Why did the results from parts (e) and (f) differ? Which result is biased, and why? (Hint: see pages 75-76 of Gerber and Green, with more detailed discussion optionally available on pages 116-121.)
 
-**The researchers had two different studies.  Several factors differed between them, including the candidates' party affliation and their viabilities to win.  Part f shows these factors are much better predictor of whether people remembered the names than whether or not they saw the ads.  Part e is biased because it did include the study number.**
+**The researchers had two different studies.  Several factors differed between them, including the candidates' party affliation and their viabilities to win.  Part f shows these factors are much better predictors of whether people remembered their names than whether or not they saw the ads.  Part e is biased because it did not include the study number.**
 
 h. Skim this [Facebook case study](https://www.facebook.com/notes/us-politics-on-facebook/case-study-reaching-voters-with-facebook-ads-vote-no-on-8/10150257619200882) and consider two claims they make reprinted below. Why might their results differ from Broockman and Green's? Please be specific and provide examples.
 
   + "There was a 19 percent difference in the way people voted in areas where Facebook Ads ran versus areas where the ads did not run."
   + "In the areas where the ads ran, people with the most online ad exposure were 17 percent more likely to vote against the proposition than those with the least."
   
-**Facebook ran their applied their treatment to areas that were most likely to be affected by the treatment.  There is not mention in the article of any randomization or control group.**
+**Facebook applied their treatment to areas that were most likely to be affected by the treatment.  There is not mention in the article of any randomization or control group.  It is not clear if this was an actual experiment.**
 
 # 2 Peruvian Recycling 
 
@@ -277,6 +277,8 @@ coef(summary(m))[1:7,]
 coefci(m, vcov. = m$cluster.vcov)[1:7,]
 ```
 
+**In part g, we did not differentiate between the sticker and non-sticker bins.  Therefore, it cannot be compared.**
+
 # 5 A Final Practice Problem 
 Now for a fictional scenario. An emergency two-week randomized controlled trial of the experimental drug ZMapp is conducted to treat Ebola. (The control represents the usual standard of care for patients identified with Ebola, while the treatment is the usual standard of care plus the drug.) 
 
@@ -332,7 +334,7 @@ m = d[, lm(temperature_day14 ~ treat_zmapp + vomiting_day0 + temperature_day0 + 
 (co = coef(summary(m)))
 ```
 
-**The coefficient estimate on the interaction term is negative, with a very low p-value.  Therefore, the drug is actually less likely to reduce men's temperatures.**
+**The coefficient estimate on the interaction term is negative, with a very low p-value.  Therefore, the drug is more likely to reduce men's temperatures.**
 
 g. Suppose that you had not run the regression in part (f). Instead, you speak with a colleague to learn about heterogenous treatment effects. This colleague has access to a non-anonymized version of the same dataset and reports that he had looked at heterogenous effects of the ZMapp treatment by each of 10,000 different covariates to examine whether each predicted the effectiveness of ZMapp on each of 2,000 different indicators of health, for 20,000,000 different regressions in total. Across these 20,000,000 regressions your colleague ran, the treatment's interaction with gender on the outcome of temperature is the only heterogenous treatment effect that he found to be statistically significant. He reasons that this shows the importance of gender for understanding the effectiveness of the drug, because nothing else seemed to indicate why it worked. Bolstering his confidence, after looking at the data, he also returned to his medical textbooks and built a theory about why ZMapp interacts with processes only present in men to cure. Another doctor, unfamiliar with the data, hears his theory and finds it plausible. How likely do you think it is ZMapp works especially well for curing Ebola in men, and why? (This question is conceptual can be answered without performing any computation.)
 
@@ -340,7 +342,7 @@ g. Suppose that you had not run the regression in part (f). Instead, you speak w
 
 h. Now, imagine that what described in part (g) did not happen, but that you had tested this heterogeneous treatment effect, and only this heterogeneous treatment effect, of your own accord. Would you be more or less inclined to believe that the heterogeneous treatment effect really exists? Why?
 
-**We would be more inclined to believe this treatment effect because we are testing specifically for that effect.**
+**We would be more inclined to believe this treatment effect because we are testing specifically for that effect.  We did not happen to find it in a list of 20 million other effects. **
 
 i. Another colleague proposes that being of African descent causes one to be more likely to get Ebola. He asks you what ideal experiment would answer this question. What would you tell him?  (*Hint: refer to Chapter 1 of Mostly Harmless Econometrics.*)
 
