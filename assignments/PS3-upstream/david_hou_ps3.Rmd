@@ -150,7 +150,7 @@ f. Suppose that the variable "percentage of visits turned in bag, baseline" had 
 
 g. In column 1 of Table 4A, would you say the variable "has cell phone" is a bad control?  Explain your reasoning.
 
-**It is not a bad control because the treatment is unlikely to have any effect on whether people obtain cell phones.**
+**The treatment is unlikely to have any effect on whether people obtain cell phones, so in that sense, it is not bad conctrol.  However, not having a cell phone precludes a person from receiving the SMS message.  In this sense, it is a bad control because having a cell phone is heavily correlated with being in teh treatment group.**
 
 h. If we were to remove the "has cell phone" variable from the regression, what would you expect to happen to the coefficient on "Any SMS message"?  Would it go up or down? Explain your reasoning.
 
@@ -161,7 +161,7 @@ Staying with the same experiment, now lets think about multifactor experiments.
 
 a. What is the full experimental design for this experiment?  Tell us the dimensions, such as 2x2x3.  (Hint: the full results appear in Panel 4B.)
 
-**The experimental design is 3x3.  There are two treatments and a control for bins; two treatments and a control for text messages.**
+**The experimental design is 3x3.  There are two treatments and a control for bins; two treatments and a control for text messages.  It can be argued that there is an additional 3x1 study on people who do not have cell phones.**
 
 b. In the results of Table 4B, describe the baseline category. That is, in English, how would you describe the attributes of the group of people for whom all dummy variables are equal to zero?
 
@@ -177,7 +177,7 @@ d. In column (1) of Table 4B, which seems to have a stronger treatment effect, t
 
 e. Is this difference you just described statistically significant?  Explain which piece of information in the table allows you to answer this question.
 
-**The difference is not statistically significant because the standard error on both effects is 1.5%.**
+**The difference is not statistically significant because the standard error on both effects is 1.5%, which will clearly cause the two 95% confidence intervals to overlap.  In addition the author's performed an F-test that showed a p-value of 0.31 for difference between the two models.**
 
 f. Notice that Table 4C is described as results from "fully saturated" models.  What does this mean?  Looking at the list of variables in the table, explain in what sense the model is "saturated."
 
@@ -248,10 +248,9 @@ d[, nocell := xor(havecell, 1)]
 f. Now add "no cell phone" as a covariate to the previous regression.  Provide a 95% confidence interval for the treatment effect.  Explain why this confidence interval does not differ much from the previous one.
 
 ```{r}
-m = robust_model(
-    d[, lm(avg_bins_treat ~ bin + base_avg_bins_treat + nocell + factor(street))], d$street)
+m = d[, lm(avg_bins_treat ~ bin + base_avg_bins_treat + nocell + factor(street))]
 coef(summary(m))[1:4,]
-coefci(m, vcov. = m$cluster.vcov)[1:4,]
+coefci(m)[1:4,]
 ```
 
 **Not having a cell phone is not a strong predictor of recycling.**
@@ -259,10 +258,9 @@ coefci(m, vcov. = m$cluster.vcov)[1:4,]
 g. Now let's add in the SMS treatment.  Re-run the previous regression with "any SMS" included.  You should get the same results as in Table 4A.  Provide a 95% confidence interval for the treatment effect of the recycling bin.  Explain why this confidence interval does not differ much from the previous one.
 
 ```{r}
-m = robust_model(
-    d[, lm(avg_bins_treat ~ bin + base_avg_bins_treat + nocell + sms + factor(street))], d$street)
+m = d[, lm(avg_bins_treat ~ bin + base_avg_bins_treat + nocell + sms + factor(street))]
 coef(summary(m))[1:5,]
-coefci(m, vcov. = m$cluster.vcov)[1:5,]
+coefci(m)[1:5,]
 ```
 
 **SMS treatment does not have a strong effect on recycling.**
@@ -346,4 +344,4 @@ h. Now, imagine that what described in part (g) did not happen, but that you had
 
 i. Another colleague proposes that being of African descent causes one to be more likely to get Ebola. He asks you what ideal experiment would answer this question. What would you tell him?  (*Hint: refer to Chapter 1 of Mostly Harmless Econometrics.*)
 
-**Likely no experiment can be conducted to test this claim.  African ancestry cannot be randomly assigned to other-wise identical groups of people.  The question is fundamentally unanswerable.**
+**Likely, no experiment can be conducted to test this claim.  African ancestry cannot be randomly assigned to other-wise identical groups of people.  The question is fundamentally unanswerable.**
