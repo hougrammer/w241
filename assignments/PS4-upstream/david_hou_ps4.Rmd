@@ -22,9 +22,10 @@ Some guidelines for submitting problem sets in this course:
 - Please ensure that someone (us!) can compile your solution set. The best way is to use the web-hosted links we've provided. 
 -->
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 # load packages 
 library(foreign)
+library(data.table)
 library(ggplot2)
 library(RColorBrewer)
 library(lmtest)
@@ -54,11 +55,11 @@ $$
 
 b. Suppose that an experiment were conducted on your pool of subjects. In what ways would the estimated CACE be informative or misleading?
 
-The estimated CACE would not be the correct sign.  Because the ATE is positive, the estimated CACE can only be positive, but we know the true CACE is negative.
+**The estimated CACE would not be the correct sign.  Because the ATE is positive, the estimated CACE can only be positive, but we know the true CACE is negative.**
 
 c. Which population is more relevant to study for future decision making: the set of Compliers, or the set of Compliers plus Never-Takers? Why?
 
-Both are important.  If compliance can be increased through some external measure, it useful to determine the CACE as an estimate of the treatment effect.  If not, the set of both groups is a good estimate of the actual treatment effect when implemented over the entire population.
+**Both are important.  If compliance can be increased through some external measure, it useful to determine the CACE as an estimate of the treatment effect.  If not, the set of both groups is a good estimate of the actual treatment effect when implemented over the entire population.**
 
 # 2. Turnout to Vote 
 Suppose that a researcher hires a group of canvassers to contact a set of 1,000 voters randomly assigned to a treatment group. When the canvassing effort concludes, the canvassers report that they successfully contacted 500 voters in the treatment group, but the truth is that they only contacted 250. When voter turnout rates are tabulated for the treatment and control groups, it turns out that 400 of the 1,000 subjects in the treatment group voted, as compared to 700 of the 2,000 subjects in the control group (none of whom were contacted). 
@@ -80,7 +81,7 @@ $$
 
 c. Do the canvassers' exaggerated reports make their efforts seem more or less effective? Define effectiveness either in terms of the ITT or CACE. Why does the definition matter? 
 
-The canvassers' exagerated reports make their efforts seem less effective in terms of CACE.  The ITT remains the same, regardless of their exageration.  They differ.  That's why it matters.
+**The canvassers' exagerated reports make their efforts seem less effective in terms of CACE.  The ITT remains the same, regardless of their exageration.  They differ.  That's why it matters.**
 
 # 3. Turnout in Dorms
 Guan and Green report the results of a canvassing experiment conduced in Beijing on the eve of a local election. Students on the campus of Peking University were randomly assigned to treatment or control groups. Canvassers attempted to contact students in their dorm rooms and encourage them to vote. No contact with the control group was attempted. Of the 2,688 students assigned to the treatment group, 2,380 were contacted. A total of 2,152 students in the treatment group voted; of the 1,334 students assigned to the control group, 892 voted. One aspect of this experiment threatens to violate the exclusion restriction. At every dorm room they visited, even those where no one answered, canvassers left a leaflet encouraging students to vote. 
@@ -102,7 +103,7 @@ a. Using the data set from the book's website, estimate the ITT. First, estimate
 # linear regression
 summary(d[, lm(turnout ~ treat2)])
 ```
-Both estimate an ITT of **`r round(itt, 4)`**.
+**Both estimate an ITT of `r round(itt, 4)`.**
 
 
 b. Use randomization inference to test the sharp null hypothesis that the ITT is zero for all observations, taking into account the fact that random assignment was clustered by dorm room. Interpret your results. 
@@ -123,14 +124,14 @@ ri = function() {
 simulated_itts = replicate(1000, ri())
 mean(itt < simulated_itts)
 ```
-There are no instances of a simulated ITT being larger than the observed ITT (one sided p-value = 0).  We reject the sharp null hypothesis.
+**There are no instances of a simulated ITT being larger than the observed ITT (one sided p-value = 0).  We reject the sharp null hypothesis.**
 
 ```{r}
 qplot(simulated_itts, bins = 30) + geom_vline(xintercept = itt, color = 'red')
 ```
 
 
-c. Assume that the leaflet had no effect on turnout. Estimate the CACE. Do this in two ways: First, estimate the CACE using means. Second, use some form of linear model to estimate this as well. If you use a 2SLS, then report the standard errors and draw inference about whether the leaflet had any causal effect among compliers. 
+c. Assume that the leaflet had no effect on turnout. Estimate the CACE. Do this in two ways: First, estimate the CACE using means. Second, use some form of linear model to estimate this as well. If you use a 2SLS, then report the standard errors and draw inference about whether contact had any causal effect among compliers.
 
 ```{r}
 # means
@@ -141,7 +142,7 @@ alpha = d[contact == 1, .N] / d[treat2 == 1, .N]
 m = d[, ivreg(turnout ~ contact | treat2)]
 (co = coeftest(m, vcov. = cluster.vcov(m, d$dormid)))
 ```
-Both methods predict a CACE of **`r round(cace, 4)`**.  The 2-stage least squares estimates a standard error of **`r round(co[2,2],4)`**.  
+**Both methods predict a CACE of `r round(cace, 4)`.  The 2-stage least squares estimates a standard error of `r round(co[2,2],4)`.  The p-value is very low, so it does seem like `contact` had an effect.**
 
 
 # 4. Why run a placebo? 
@@ -182,56 +183,67 @@ a. Estimate the proportion of Compliers by using the data on the Treatment group
 ```{r}
 treatment = d[Z == 'treatment', ]
 placebo = d[Z == 'placebo', ]
+baseline = d[Z == 'baseline', ]
 
 # estimated alpha with treatment
-(alpha = mean(treatment$D))
+(alpha_treatment = mean(treatment$D))
 
 # estimated alpha with placebo
-mean(placebo$D)
+(alpha_placebo = mean(placebo$D))
 
 # test of statistical difference
 t.test(treatment$D, placebo$D)
 
 ```
 
-The two estimates are not significantly different.  The experiment defines sucessful delivery of treatment when contact is established.  What the canvasser talks about after contact, has no effect on whether the contact happens.
+**The two estimates are not significantly different.  The experiment defines sucessful delivery of treatment when contact is established.  What the canvasser talks about after contact, has no effect on whether the contact happens.**
 
 b. Do the data suggest that Never Takers in the treatment and placebo groups have the same rate of turnout? Is this comparison informative? 
 
 ```{r}
 t.test(treatment[D == 0, Y], placebo[D == 0, Y])
 ```
-The data suggests the same rate of turnout for Never Takers from both groups.  This comparison says that being assigned to either group has no effect on Never Takers' turnout.
+**The data suggests the same rate of turnout for Never Takers from both groups.  This comparison says that being assigned to either group has no effect on Never Takers' turnout.**
 
 c. Estimate the CACE of receiving the placebo. Is this estimate consistent with the substantive assumption that the placebo has no effect on turnout? 
 
 ```{r}
-(co = coeftest(placebo[, lm(Y ~ D)]))
+itt = placebo[, mean(Y)] - baseline[, mean(Y)]
+(cace = itt / alpha_placebo)
+
+(co = coeftest(d[Z == 'placebo' | Z == 'baseline', ivreg(Y ~ D | Z == 'placebo')]))
 ```
-The estimated CACE is **`r round(co[2,1], 4)` (`r round(co[2,2], 4)`)**.
+
+**The estimated CACE is `r round(co[2,1], 4)` (`r round(co[2,2], 4)`).  The estimate is insignificant, which is consistent with the assumption that the placebo has no effect on turnout.**
 
 d. Estimate the CACE of receiving the treatment using two different methods. First, use the conventional method of dividing the ITT by the ITT_{D}. (This should be a treatment vs. control comparison.)
 
 ```{r}
+# means
 itt = mean(d[Z == 'treatment', Y]) - mean(d[Z == 'baseline', Y])
+(cace = itt / alpha_treatment)
 
-# with alpha from part a
-(cace = itt / alpha)
+# 2SLS
+m = d[Z == 'treatment' | Z == 'baseline', ivreg(Y ~ D | Z == 'treatment')]
+(co = coeftest(m))
 ```
+**The estimated CACE is `r round(co[2,1], 4)` (`r round(co[2,2], 4)`).**
 
 e. Then, second, compare the turnout rates among the Compliers in both the treatment and placebo groups. Interpret the results. 
 
 ```{r}
-itt2 = mean(d[Z == 'treatment', Y]) - mean(d[Z == 'placebo', Y])
+# means
+(itt2 = treatment[D == 1, mean(Y)] - placebo[D == 1, mean(Y)])
 
-# with alpha from part a
-(cace2 = itt2 / alpha)
+# regression
+m = d[(Z == 'treatment' | Z == 'placebo') & D == 1, lm(Y ~ Z)]
+(co = coeftest(m))
 ```
-The effect when comparing treatment to baseline is higher than when comparing treatment to placebo.  
+**The estimated CACE is `r round(co[2,1], 4)` (`r round(co[2,2], 4)`).  It is much smaller compared to part d.  This could suggest that there may be some placebo effect on Y.  Although part c showed no significant effect, the estimate was still positive.**
 
 f. Based on what we talked about in class -- that the rate of compliance determines whether one or another design is more efficient -- given the compliance rate in this study, which design *should* provide a more efficient estimate of the treatment effect? If you want to review the specific paper that makes this claim, check out [this link](https://github.com/UCB-MIDS/experiments-causality/blob/master/readings/GerberGreenKaplanKern.2010.pdf). Does it? 
 
-
+**Because the compliance rate is so low, the placebo design should be better at estimating the CACE.**
 
 <!--
 # EVERYTHING IN THIS COMMENTED SECTION IS NOT REQUIRED. THESE ARE GOOD PROBLEMS, AND IF YOU WANT TO CHECK YOUR 
@@ -259,58 +271,66 @@ A doctoral student conducted an experiment in which she randomly varied whether 
 
 ```{r}
 d = data.table(read.dta("./data/Hough_WorkingPaper_2010.dta"))
-d = d[!is.na(tetris),]
+#d = d[!is.na(tetris),]
 head(d)
 ``` 
 
 a. Suppose you were seeking to estimate the average effect of running on her Tetris score. Explain the assumptions needed to identify this causal effect based on this within-subjects design. Are these assumptions plausible in this case? What special concerns arise due to the fact that the subject was conducting the study, undergoing the treatments, and measuring her own outcomes? 
 
+**The two assumptions (along with randomization, exclusion, and non-interference) are no-anticipation and no-persistence.  The former is very plausible, especially if she assigns whether she runs on a particular day after she plays Tetris on the previous day.  The latter is probably satisfied as well.  Unless she is going on extremely long runs or gets injured, it is unlikely any effects on her Tetris playing persists to the next day.  The fact that that she is performing the study on herself could only be problematic if she is hoping for some specific effect, e.g. if she hopes that running makes her a better Tetris player, she might try harder on days that she runs.**
+
 b. Estimate the effect of running today on Tetris score. What is the ATE?
 
-
 ```{r}
-mean(d[run == 1, tetris]) - mean(d[run == 0, tetris])
+m = d[, lm(tetris ~ run)]
+(co = coeftest(m))
 ```
+<!--What an absurd error.  Apparently PDF knit breaks if R tries to output scientific notation.  The format() here is to prevent that. -->
+**The estimated effect is `r format(co[2,1])` (`r format(co[2,2])`).**
 
 c. One way to lend credibility to with-subjects results is to verify the no-anticipation assumption. Construct a regression using the variable `run` to predict the `tetris` score *on the preceding day*. Presume that the randomization is fixed. Why is this a test of the no-anticipation assumption? Does a test for no-anticipation confirm this assumption? 
 
 ```{r}
-summary(lm(d[1:.N-1, tetris] ~ d[2:.N, run]))
+m = lm(d[1:.N-1, tetris] ~ d[2:.N, run])
+(co = coeftest(m))
 ```
-The regression shows no evidence of anticipation.  Whether she runs the next day has no effect on the Tetris score in the previous day.
+**The estimated effect is `r format(co[2,1])` (`r format(co[2,2])`).  This shows no evidence of anticipation.  Whether she runs the next day has no effect on the Tetris score in the previous day.**
 
 d. Now let's use regression to put a standard error on our ATE estimate from part (b). Regress Tetris score on the the variable `run`, this time using the current rather than the future value of `run`.  Is the impact on Tetris score statistically significant? 
 
 ```{r}
-summary(d[, lm(tetris ~ run)])
+m = d[, lm(tetris ~ run)]
+(co = coeftest(m))
 ```
-The estimate is statistically significant.
+**The estimated effect is `r format(co[2,1])` (`r format(co[2,2])`).  The estimate is statistically significant.**
 
 e. If Tetris responds to exercise, one might suppose that energy levels and GRE scores would as well. Are these hypotheses borne out by the data?  
 
 ```{r}
-summary(d[, lm(energy ~ run)])
+m = d[, lm(energy ~ run)]
+(co = coeftest(m))
 ```
-Energy is not significanly affected by running.
+**The estimated effect is `r format(co[2,1])` (`r format(co[2,2])`).  Energy is not significantly affected by running.**
 
 ```{r}
-summary(d[, lm(gre ~ run)])
+m = d[, lm(gre ~ run)]
+(co = coeftest(m))
 ```
-GRE scores are not significantly affected by running.
+**The estimated effect is `r format(co[2,1])` (`r format(co[2,2])`).  GRE scores are not significantly affected by running.**
 
 f. Suppose the student decides to publish her results on Tetris, since she finds those most interesting.  In the paper she writes, she chooses to be concise by ignoring the data she collected on energy levels and GRE scores, since she finds those results less interesting.  How might you criticize the student's decision?  What trap may she have fallen into?
 
-She could have gotten the Tetris results by chance.  It is useful to report her other regressions, to show that she did not go fishing for results. In this case, since there are only three regressions (and the Tetris one was done first), the results would be significant even after corrections for multiple regressions.
+**She could have gotten the Tetris results by chance.  It is useful to report her other regressions, to show that she did not go fishing for results. In this case, since there are only three regressions (and the Tetris one was done first), the results would be significant even after corrections for multiple regressions.**
 
 g. After submitting her paper to a journal, the student thinks of another hypothesis.  What if running has a relatively long-lasting effect on Tetris scores?  Perhaps both today's running and yesterday's running will affect Tetris scores.  Run a regression of today's Tetris score on both today's `run` variable and yesterday's `run` variable.  How does your coefficient on running today compare with what you found in part (d)?  How do you interpret this comparison?
 
 ```{r}
 d = d[, ran_yesterday := c(NA, d[1:.N-1, run])]
-m = d[, lm(tetris ~ run + ran_yesterday)]
-ate = coeftest(m)[2,1]
-summary(m)
+m = d[, lm(tetris ~ run + run*ran_yesterday)]
+(co = coeftest(m))
+ate = co[2,1] # for part h
 ```
-For the coefficient on `run`, the estimate increased and the standard error decreased.
+**The estimated effect is `r format(co[2,1])` (`r format(co[2,2])`).  The estimate and the standard error increased, but this could have been due to the loss of statistical power from so few days having `run == 1 & ran_yesterday == 1`.  Importantly, the coefficients on `ran_yesterday` and the interaction term are low and insignificant, confirming the no anticipation effect.**
 
 h. (optional) Note that the observations in our regression are not necessarily independent of each other. An individual might have serially correlated outcomes, regardless of treatment.  For example, I might find that my mood is better on weekends than on weekdays, or I might find that I'm terrible at playing Tetris in the few days before a paper is due, but I get better at the game once my stress level has lowered. In computing standard errors for a regression, OLS assumes that the observations are all independent of each other.  If they are positively serially correlated, it's possible that OLS will underestimate the standard errors.
 
@@ -321,7 +341,7 @@ N = d[, .N]
 
 ri = function() {
     run = sample(c(0,1), N, replace = T)
-    m = lm(d[2:.N, tetris] ~ run[1:N-1] + run[2:N])
+    m = lm(d[2:N, tetris] ~ run[1:N-1] + run[2:N])
     coeftest(m)[2,1]
 }
 ```
@@ -332,12 +352,15 @@ mean(simulated_ates > ate)
 ```{r}
 # confidence interval for model from part g
 (ci = confint(m)[2, ])
+# simulated confidence interval
 (simulated_ci = quantile(simulated_ates, probs = c(.025, .975)))
 
+# confidence interval range
 unname(ci[2] - ci[1])
+# simulated confidence interval range
 unname(simulated_ci[2] - simulated_ci[1])
 ```
-The simulated confidence interval is wider than the one from part g.
+**The simulated confidence interval is wider than the one from part g.**
 
 ```{r}
 cols = brewer.pal(4, 'Set1')

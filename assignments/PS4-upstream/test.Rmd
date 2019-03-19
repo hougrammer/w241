@@ -1,0 +1,57 @@
+---
+title: 'Problem Set #4'
+author: 'Experiment Design: Alex & Daniel'
+output:
+  pdf_document: 
+    latex_engine: xelatex
+  html_document: default
+urlcolor: blue
+---
+
+<!--
+Some guidelines for submitting problem sets in this course:
+
+- Please submit a PDF document rather than a Word document or a Google document.
+- Please put your name at the top of your problem set.
+- Please **bold** or *highlight* your numerical answers to make them easier to find.
+- If you'll be using `R` or `Python` code to calculate your answers, please put the code and its output directly into your Problem Set PDF document.
+- It is highly recommended, although not required, that you use the RMarkdown feature in RStudio to compose your problem set answers. RMarkdown allows you to easily intermingle analysis code and answers in one document. It is of a similar design as `jupyter` and an ipython notebook.
+- You do not need to show work for trivial calculations, but showing work is always allowed.
+- For answers that involve a narrative response, please feel free to describe the key concept directly and briefly, if you can do so, and do not feel pressure to go on at length.
+- Please ask us questions about the problem set if you get stuck. **Don't spend more than 20 minutes puzzling over what a problem means.** 
+- Please ensure that someone (us!) can compile your solution set. The best way is to use the web-hosted links we've provided. 
+-->
+
+```{r message=FALSE, warning=FALSE}
+# load packages 
+library(foreign)
+library(data.table)
+library(ggplot2)
+library(RColorBrewer)
+library(lmtest)
+library(sandwich)
+library(multiwayvcov)
+library(AER)
+```
+
+# 5. Tetris FTW? 
+A doctoral student conducted an experiment in which she randomly varied whether she ran or walked 40 minutes each morning. In the middle of the afternoon over a period of 26 days she measured the following outcome variables: (1) her weight; (2) her score in Tetris; (3) her mood on a 0-5 scale; (4) her energy; and (5) whether she got a question right on the math GRE. 
+
+```{r}
+d = data.table(read.dta("./data/Hough_WorkingPaper_2010.dta"))
+d = d[!is.na(tetris),]
+head(d)
+``` 
+
+a. Suppose you were seeking to estimate the average effect of running on her Tetris score. Explain the assumptions needed to identify this causal effect based on this within-subjects design. Are these assumptions plausible in this case? What special concerns arise due to the fact that the subject was conducting the study, undergoing the treatments, and measuring her own outcomes? 
+
+The two assumptions on no-anticipation and no-persistence.  The former is very plausible, especially if she assigns whether she runs on a particular day after she plays Tetris on the previous day.  The latter is probably satisfied as well.  Unless she is going on extremely long runs or gets injured, it is unlikely any effects on her Tetris playing persists to the next day.  The fact that that she is performing the study on herself could only be problematic if she is hoping for some specific effect, e.g. if she hopes that running makes her a better Tetris player, she might try harder on days that she runs.
+
+b. Estimate the effect of running today on Tetris score. What is the ATE?
+
+```{r}
+m = d[, lm(tetris ~ run)]
+(co = coeftest(m))
+```
+The estimated effect is `r format(co[2,1])`
+
