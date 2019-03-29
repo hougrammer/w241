@@ -158,10 +158,15 @@ Suppose that researchers are concerned with the health consequences of what peop
 A statistical test shows that the apparent treatment effect is far greater than one would expect by chance. The authors conclude that a minor adjustment, reducing plate size, will help people lose weight. 
 
 - How convincing is the evidence regarding the effect of plate size of what people eat and how much they weight? 
-- What design and measurment improvements do you suggest? 
+
+**The evidence is convincing of plate size effecting the quantity of people eat but says nothing about weight loss.**
+
+- What design and measurment improvements do you suggest?
+
+**The design could be improved to a longer term study in which people are randomly assigned different sized plates over several meals.  Then, we can see if the effect lasts long enough over time to actually produce changes in weight.**
 
 # 4. Think about Treatment Effects 
 
 Throughout this course we have focused on the average treatment effect. Think back to *why* we are concerned about the average treatment effect. What is the relationship between an ATE, and some individuals' potential outcomes? Make the strongest case you can for why this is *good* measure. 
 
-
+**The true ATE is the difference between individuals' potential outcomes to treatment and control.  We can never observe the true ATE, so we perform experiments to produce an estimate.  Given good randomization, non-interference between subjects, and treatment that effects the outcome only through dosage, experiments offer an unbiased estimate of the true ATE.**
