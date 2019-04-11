@@ -55,7 +55,7 @@ a. Run a crosstab of total_ad_exposures_week1 and treatment_ad_exposures_week1 t
 ```{r}
 d1[, table(total_ad_exposures_week1, treatment_ad_exposures_week1)]
 ```
-**The distributions look reasonable.  Each row in the lower triangle looks like it is roughly binomially distributed.**
+**The distributions look reasonable.  Each row in the lower triangle looks like it is roughly binomially distributed.  This makes sense because the ith row and jth column corresponds to randomly getting j successes out of i trials with a probability of 1/2.**
 
 b. Your colleague proposes the code printed below to analyze this experiment: 
 `lm(week1 ~ treatment_ad_exposures_week1, data)` You are suspicious. Run a placebo test with the prior week's purchases as the outcome and report the results. Did the placebo test "succeed" or "fail"? Why do you say so?
@@ -63,22 +63,85 @@ b. Your colleague proposes the code printed below to analyze this experiment:
 ```{r}
 d1[, summary(lm(week0 ~ treatment_ad_exposures_week1))]
 ```
-**The placebo test failed.  The treatment coefficient is very statistically significant, even for week 0 revenue, before it is applied.  Treatment assignment is somehow being preferentially applied more to people who already buy the advertised product.**
+**The placebo test failed.  The treatment coefficient is very statistically significant, even for week 0 revenue, before it is applied.  It appear that treatment assignment is closely correlated with whether people already buy the product.**
 
 c. The placebo test suggests that there is something wrong with our experiment or our data analysis. We suggest looking for a problem with the data analysis. Do you see something that might be spoiling the randomness of the treatment variable? How can you improve your analysis to get rid of this problem? Why does the placebo test turn out the way it does? What one thing needs to be done to analyze the data correctly? Please provide a brief explanation of why, not just what needs to be done. (*Note: This question, and verifying that you answered it correctly in part d below, may require some thinking. If we find many people can't figure it out, we will post another hint in a few days.*)
 
-
+**People who visit the site many times are not the same as those who visit only a few times.  A simple regression shows that the total number of visits (which should be uneffected by treatment per assumption 4) is actually a very good predictor week 0 revenue.  People who visit the site more are more likely to buy the product.  One possible explanation is that people who use the internet more are more likely to shop in general, thus increasing their probability of buying the product.**
+```{r}
+d1[, summary(lm(week0 ~ total_ad_exposures_week1))]
+```
+```{r}
+(grouped = d1[order(total_ad_exposures_week1), .(mean_week0 = mean(week0)), by = total_ad_exposures_week1])
+ggplot(grouped, aes(total_ad_exposures_week1, mean_week0)) + 
+    geom_bar(stat = 'identity') +
+    labs(x = 'Total Ad Exposures', y = 'Week 0 Revenue')
+```
+**The placebo test failed because treatment ad exposure is closely correlated with total ad exposure.  That is, we see treatment as a strong predictor for week 0 revenue because treatment is a strong predictor for total ads seen.  We can solve this issue by controlling for the total ads seen in our regression.**
 
 d. Implement the procedure you propose from part (c), run the placebo test for the Week 0 data again, and report the results. (This placebo test should pass; if it does not, re-evaluate your strategy before wasting time proceeding.)
+
+```{r}
+d1[, summary(lm(week0 ~ treatment_ad_exposures_week1 + total_ad_exposures_week1))]
+```
+**We see now that treatment in week 1 is no longer a strong predictor of revenue in week 0.  The placebo test now passes.**
+
 e. Now estimate the causal effect of each ad exposure on purchases during the week of the campaign itself using the same technique that passed the placebo test in part (d).
+
+```{r}
+m = d1[, lm(week1 ~ treatment_ad_exposures_week1 + total_ad_exposures_week1)]
+(co = coeftest(m))
+```
+**The regression shows an effect of `r round(co[2,1], 4)` (`r round(co[2,2], 4)`).  This is statistically significant even when controlling for the total ad exposures.**
+
 f. The colleague who proposed the specification in part (b) challenges your results -- they make the campaign look less successful. Write a paragraph that a layperson would understand about why your estimation strategy is superior and his/hers is biased.
+
+```{r}
+m = d1[, lm(week1 ~ treatment_ad_exposures_week1)]
+(co = coeftest(m))
+```
+**The colleague's specification shows an effect of `r round(co[2,1], 4)` (`r round(co[2,2], 4)`).  This effect is much larger, but does not account for the fact that people who are more likely to see the treatment ads are more likely to buy the product anyways because of frequent visits to the website.  Therefore, the colleague's specification is biased.**
+
 g. Estimate the causal effect of each treatment ad exposure on purchases during and after the campaign, up until week 10 (so, total purchases during weeks 1 through 10).
+
+```{r}
+d1[, during_after := week1 + week2 + week3 + week4 + week5 + week6 + week7 + week8 + week9 + week10]
+m = d1[, lm(during_after ~ treatment_ad_exposures_week1 + total_ad_exposures_week1)]
+(co = coeftest(m))
+```
+**The regression shows an effect of `r round(co[2,1], 4)` (`r round(co[2,2], 4)`).  This is not statistically significant.**
+
 h. Estimate the causal effect of each treatment ad exposure on purchases only after the campaign.  That is, look at total purchases only during week 2 through week 10, inclusive.
+
+```{r}
+d1[, after := week2 + week3 + week4 + week5 + week6 + week7 + week8 + week9 + week10]
+m = d1[, lm(after ~ treatment_ad_exposures_week1 + total_ad_exposures_week1)]
+(co = coeftest(m))
+```
+**The regression shows an effect of `r round(co[2,1], 4)` (`r round(co[2,2], 4)`).  This is statistically significant but negative.**
+
 i. Tell a story that could plausibly explain the result from part (h).
+
+**The ads could be causing people, who would have otherwise bought the product anyways, to buy it earlier.  The increase in revenue goes away after the initial wave of purchases.**
+
 j. Test the hypothesis that the ads for product B are more effective, in terms of producing additional revenue in week 1 only, than are the ads for product A.
 (*Hint: The easiest way to do this is to throw all of the observations into one big regression and specify that regression in such a way that it tests this hypothesis.*)
 (*Hint 2: There are a couple defensible ways to answer this question that lead to different answers. Don't stress if you think you have an approach you can defend.*)
+
+```{r}
+m = d1[, lm(week1 ~ treatment_ad_exposures_week1 + total_ad_exposures_week1 + treatment_ad_exposures_week1*product_b)]
+(co = coeftest(m))
+```
+**The regression shows an interaction effect of `r round(co[5,1], 4)` (`r round(co[5,2], 4)`).  This is statistically insignificant, which does not seem to support the hypothesis that ads for product B are more effective.  The coefficient on `product_b` is significant, so product B is a better-selling item than product A, but there does not seem to be a heterogeneous treatment effect.**
+
 k. You notice that the ads for product A included celebrity endorsements. How confident would you be in concluding that celebrity endorsements increase the effectiveness of advertising at stimulating immediate purchases?
+
+```{r}
+d1[, product_a := 1 - product_b]
+m = d1[, lm(week1 ~ treatment_ad_exposures_week1 + total_ad_exposures_week1 + treatment_ad_exposures_week1*product_a)]
+(co = coeftest(m))
+```
+**I would not be confident in concluding that celebrity endorsements increase effectiveness.  The regression shows that treatment for product A performs no better.**
 
 # 2. Vietnam Draft Lottery 
 A [famous paper](http://sites.duke.edu/niou/files/2011/06/Angrist_lifetime-earningsmall.pdf) by Angrist exploits the randomized lottery for the Vietnam draft to estimate the effect of education on wages. (*Don't worry about reading this article, it is just provided to satisfy your curiosity; you can answer the question below without referring to it. In fact, it may be easier for you not to, since he has some complications to deal with that the simple data we're giving you do not.*)
@@ -109,7 +172,7 @@ a. Suppose that you had not run an experiment. Estimate the "effect" of each yea
 m = d2[, lm(income ~ years_education)]
 (co = coeftest(m))
 ```
-**The regression shows an effect of `r round(co[2,1], 2)` (`r round(co[2,2], 2)`).  The effect is statistically significant.**
+**The regression shows an effect of `r round(co[2,1], 2)` (`r round(co[2,2], 2)`).  The effect is statistically significant.  This naive regression suggests that years of education increase income by `r round(co[2,1], 2)`.**
 
 b. Continue to suppose that we did not run the experiment, but that we saw the result that you noted in part (a). Tell a concrete story about why you don't believe that observational result tells you anything causal. 
 
@@ -138,6 +201,10 @@ e. Divide the estimate from part (d) by the estimate in part (c) to estimate the
 co2[2,1] / co1[2,1]
 ```
 **The results suggest that each year of education adds `r round(co2[2,1] / co1[2,1], 2)` to income.  The estimate is lower than that from part a.**
+```{r}
+d2[, summary(ivreg(income ~ years_education | high_ranked))]
+```
+**2SLS produces the same estimate.  The effect is statistically significant.**
 
 f. Natural experiments rely crucially on the "exclusion restriction" assumption that the instrument (here, having a high draft rank) cannot affect the outcome (here, income) in any other way except through its effect on the "endogenous variable" (here, education). Give one reason this assumption may be violated -- that is, why having a high draft rank could affect individuals' income other than because it nudges them to attend school for longer.
 
@@ -145,11 +212,20 @@ f. Natural experiments rely crucially on the "exclusion restriction" assumption 
 
 g. Conduct a test for the presence of differential attrition by treatment condition. That is, conduct a formal test of the hypothesis that the "high-ranked draft number" treatment has no effect on whether we observe a person's income. (Note, that an earning of $0 *actually* means they didn't earn any money.)
 
-
+```{r}
+grouped = d2[, .N, by = draft_number]
+m = grouped[, lm(N ~ draft_number <= 80)]
+(co = coeftest(m))
+```
+**The regression shows an effect of `r round(co2[2,1], 2)` (`r round(co2[2,2], 2)`).  This is statistically significant, meaning there are fewer people in the high ranked groups, suggesting differential attrition.**
 
 h. Tell a concrete story about what could be leading to the result in part (g).
+
+**People who were high-ranked were likely drafted to the war.  Not everyone in those groups were able to apply to college and dodge the draft.  As a result, many people went to war and, due to injury or death, were not able to be observed.**
+
 i. Tell a concrete story about how this differential attrition might bias our estimates.
 
+**Our sample is now biased with more people who were able to successfully apply and get into college.  These people may have higher ability than those who were unable to get into school and got drafted into the war.  As a result, they may also have higher earning potential.**
 
 # 3. Dinner Plates 
 
@@ -159,14 +235,14 @@ A statistical test shows that the apparent treatment effect is far greater than 
 
 - How convincing is the evidence regarding the effect of plate size of what people eat and how much they weight? 
 
-**The evidence is convincing of plate size effecting the quantity of people eat but says nothing about weight loss.**
+**The evidence is convincing of plate size affecting the quantity of people eat at a specific dinner but says nothing about weight loss.  In order to affect weight loss, the effect would have to last over longer periods of time, during which people may revert back to old eating habits.**
 
 - What design and measurment improvements do you suggest?
 
-**The design could be improved to a longer term study in which people are randomly assigned different sized plates over several meals.  Then, we can see if the effect lasts long enough over time to actually produce changes in weight.**
+**The design could be improved to a longer term study in which people are randomly assigned different sized plates over several meals.  Then, we can see if the effect lasts long enough over time to actually produce changes in weight.  It would also be interesting to periodically change the plate size and see if people's eating habits are changed over time or if it is truly only the plate size that affects amount eaten.**
 
 # 4. Think about Treatment Effects 
 
 Throughout this course we have focused on the average treatment effect. Think back to *why* we are concerned about the average treatment effect. What is the relationship between an ATE, and some individuals' potential outcomes? Make the strongest case you can for why this is *good* measure. 
 
-**The true ATE is the difference between individuals' potential outcomes to treatment and control.  We can never observe the true ATE, so we perform experiments to produce an estimate.  Given good randomization, non-interference between subjects, and treatment that effects the outcome only through dosage, experiments offer an unbiased estimate of the true ATE.**
+**The true ATE is the difference between individuals' potential outcomes to treatment and control.  We can never observe the true ATE, so we perform experiments to produce an estimate.  Given good randomization, non-interference between subjects, and treatment that affects the outcome only through dosage, experiments offer an unbiased estimate of the true ATE.  This is a good measure because it is best estimate of the actual effect of treatment.**
